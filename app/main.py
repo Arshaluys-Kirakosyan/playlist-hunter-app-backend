@@ -491,5 +491,3 @@ def webhook():
 def user():
     return user_info, 200
     
-if __name__ == "__main__":
-  app.run()
