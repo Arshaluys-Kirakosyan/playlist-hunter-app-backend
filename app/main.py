@@ -262,7 +262,7 @@ def create_customer():
     except Exception as e:
         return jsonify(error=str(e)), 403
 
-@app.route('/sub', methods=['POST'])
+@app.route('/subscription', methods=['POST'])
 @cross_origin()
 def sub():
     email_req = request.json.get('email', None)
@@ -300,37 +300,17 @@ def sub():
     user_info['email'] = email_req
     
     return {'status': status, 'client_secret': client_secret, 'sub_id': subscription.id}, 200
-# @app.route('/create-subscription', methods=['POST'])
-# @cross_origin()
-# def createSubscription():
-#   data = json.loads(request.data)
-#   try:
-#     # Attach the payment method to the customer
-#     stripe.PaymentMethod.attach(
-#       data['paymentMethodId'],
-#       customer=data['customerId'],
-#     )
-#     # Set the default payment method on the customer
-#     stripe.Customer.modify(
-#       data['customerId'],
-#       invoice_settings={
-#           'default_payment_method': data['paymentMethodId'],
-#       },
-#     )
-#     # Create the subscription
-#     subscription = stripe.Subscription.create(
-#       customer=data['customerId'],
-#       items=[
-#           {
-#               'price': os.environ.get('STRIPE_PRICE_ID')
-#           }
-#       ],
-#       expand=['latest_invoice.payment_intent'],
-#     )
-#     print(subscription)
-#     return jsonify(subscription)
-#   except Exception as e:
-#     return jsonify(error={'message': str(e)}), 200
+
+@app.route('/cancel-subscription', methods=['POST'])
+@cross_origin()
+def cancelSubscription():
+  subscriptionId = request.json.get('subscriptionId', None)
+  try:
+    # Cancel the subscription by deleting it
+    deletedSubscription = stripe.Subscription.delete(subscriptionId)
+    return jsonify(deletedSubscription)
+  except Exception as e:
+    return jsonify(error=str(e)), 403
 
 @app.route('/retry-invoice', methods=['POST'])
 @cross_origin()
@@ -356,17 +336,6 @@ def retrySubscription():
     return jsonify(invoice)
   except Exception as e:
     return jsonify(error={'message': str(e)}), 200
-
-@app.route('/cancel-subscription', methods=['POST'])
-@cross_origin()
-def cancelSubscription():
-  data = json.loads(request.data)
-  try:
-    # Cancel the subscription by deleting it
-    deletedSubscription = stripe.Subscription.delete(data['subscriptionId'])
-    return jsonify(deletedSubscription)
-  except Exception as e:
-    return jsonify(error=str(e)), 403
 
 @app.route('/sub_details', methods=['POST'])
 @cross_origin()
